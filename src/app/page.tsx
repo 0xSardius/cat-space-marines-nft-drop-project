@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ConnectButton, useReadContract } from "thirdweb/react";
+import { ConnectButton, MediaRenderer, useReadContract } from "thirdweb/react";
 import thirdwebIcon from "@public/thirdweb.svg";
 import { client } from "./client";
 import { defineChain, getContract, toEther } from "thirdweb";
@@ -22,17 +22,20 @@ export default function Home() {
     address: "0xe6C5502b816f1Bc938cd5858975831b19002E666",
   });
 
-  const { data: contractMetadata } = useReadContract(getContractMetadata, {
-    contract: contract,
-  });
+  const { data: contractMetadata, isLoading: isContractMetadataLoading } =
+    useReadContract(getContractMetadata, {
+      contract: contract,
+    });
 
-  const { data: claimedSupply } = useReadContract(getTotalClaimedSupply, {
-    contract: contract,
-  });
+  const { data: claimedSupply, isLoading: isClaimedSupplyLoading } =
+    useReadContract(getTotalClaimedSupply, {
+      contract: contract,
+    });
 
-  const { data: totalNFTSupply } = useReadContract(nextTokenIdToMint, {
-    contract: contract,
-  });
+  const { data: totalNFTSupply, isLoading: isTotalSupplyLoading } =
+    useReadContract(nextTokenIdToMint, {
+      contract: contract,
+    });
 
   const { data: claimCondition } = useReadContract(getActiveClaimCondition, {
     contract: contract,
@@ -49,6 +52,32 @@ export default function Home() {
       <div className="py-20 text-center">
         <Header />
         <ConnectButton client={client} chain={chain} />
+        <div className="flex flex-col items-center mt-4">
+          {isContractMetadataLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <>
+              <MediaRenderer
+                client={client}
+                src={contractMetadata?.image}
+                className="rounded-xl"
+              />
+              <h2 className="text-2xl font-semibold mt-4">
+                {contractMetadata?.name}
+              </h2>
+              <p className="text-lg mt-2">{contractMetadata?.description}</p>
+            </>
+          )}
+
+          {isClaimedSupplyLoading || isTotalSupplyLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <p className="text-lg mt-2 font-bold">
+              Total NFT Supply: {claimedSupply?.toString()}/
+              {totalNFTSupply?.toString()} claimed
+            </p>
+          )}
+        </div>
       </div>
     </main>
   );
