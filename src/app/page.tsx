@@ -16,6 +16,7 @@ import { getContractMetadata } from "thirdweb/extensions/common";
 import { getTotalClaimedSupply } from "thirdweb/extensions/erc721";
 import { nextTokenIdToMint } from "thirdweb/extensions/erc721";
 import { getActiveClaimCondition } from "thirdweb/extensions/erc721";
+import { claimTo } from "thirdweb/extensions/erc721";
 import { useState } from "react";
 
 export default function Home() {
@@ -115,8 +116,12 @@ export default function Home() {
                 quantity: BigInt(quantity),
               })
             }
+            onTransactionConfirmed={async () => {
+              alert("NFT Claimed!");
+              setQuantity(1);
+            }}
           >
-            {`Claim NFT (${getPrice(quantity)} ETH`}
+            {`Claim NFT (${getPrice(quantity)} ETH)`}
           </TransactionButton>
         </div>
       </div>
