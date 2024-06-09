@@ -1,7 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { ConnectButton, MediaRenderer, useReadContract } from "thirdweb/react";
+import {
+  ConnectButton,
+  MediaRenderer,
+  TransactionButton,
+  useActiveAccount,
+  useReadContract,
+} from "thirdweb/react";
 import thirdwebIcon from "@public/thirdweb.svg";
 import { client } from "./client";
 import { defineChain, getContract, toEther } from "thirdweb";
@@ -10,10 +16,14 @@ import { getContractMetadata } from "thirdweb/extensions/common";
 import { getTotalClaimedSupply } from "thirdweb/extensions/erc721";
 import { nextTokenIdToMint } from "thirdweb/extensions/erc721";
 import { getActiveClaimCondition } from "thirdweb/extensions/erc721";
+import { useState } from "react";
 
 export default function Home() {
+  const account = useActiveAccount();
   // Easy define chains with thirdweb
   const chain = defineChain(baseSepolia);
+
+  const [quantity, setQuantity] = useState(1);
 
   // Thirdweb contract wrapper
   const contract = getContract({
@@ -77,6 +87,37 @@ export default function Home() {
               {totalNFTSupply?.toString()} claimed
             </p>
           )}
+          <div className="flex flex-row items-center justify-center my-4">
+            <button
+              className="bg-black text-white px-4 py-2 rounded-md mr-4"
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+            >
+              -
+            </button>
+            <input
+              type="text"
+              value={quantity}
+              onChange={(e) => setQuantity(parseInt(e.target.value))}
+              className="w-10 text-center border border-gray-300 rounded-md bg-black text-white"
+            />
+            <button
+              className="bg-black text-white px-4 py-2 rounded-md mr-4"
+              onClick={() => setQuantity(quantity + 1)}
+            >
+              +
+            </button>
+          </div>
+          <TransactionButton
+            transaction={() =>
+              claimTo({
+                contract: contract,
+                to: account?.address || "",
+                quantity: BigInt(quantity),
+              })
+            }
+          >
+            {`Claim NFT (${getPrice(quantity)} ETH`}
+          </TransactionButton>
         </div>
       </div>
     </main>
